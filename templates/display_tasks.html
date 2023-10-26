@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/static/styles.css" />
+    <!-- <script src="{{ url_for('static', filename='dexie.min.js') }}"></script> -->
+
+</head>
+</head>
+
+
+<body>
+    <div class="popup-label">File upload Task manager</div> <br />
+    <!-- Add New Task button -->
+    <button type="button" id="addNewTaskButton">Add New Task</button><br />
+    <input type="text" id="taskNameSearch" placeholder="Search by Task Name"><br />
+
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Task ID</th>
+                <th>Task Name</th>
+                <th>Type</th>
+                <th>Active</th>
+                <th>Last Run</th>
+                <th>Next Run</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+        <!-- Pagination buttons in table footer -->
+        <tfoot>
+            <tr>
+                <td colspan="6" id="pagination-buttons">
+                    <button id="prevPage">&#9668;</button> <!-- Left arrow -->
+                    <button id="nextPage">&#9658;</button> <!-- Right arrow -->
+                </td>
+            </tr>
+        </tfoot>
+
+        <!-- Edit window -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="close" id="closeModal">&times;</span>
+                    <h4 id="modalTitle">Edit Task</h4>
+                </div>
+                <div class="form-scroll">
+                    <form id="editForm">
+                        <label for="editTaskId">Task ID:</label><br>
+                        <input type="text" id="newTaskId" name="newTaskId"> <br />
+
+                        <label for="editTaskName">Task Name:</label><br />
+                        <input type="text" id="newTaskName" name="newTaskName"> <br />
+
+                        <label for="editTaskType">Task Type:</label><br />
+                        <select id="newTaskType" name="newTaskType">
+                            <option value="" disabled>please choose type</option>
+                            <option value="User Group">User Group</option>
+                            <option value="Monthly">Monthly</option>
+                        </select><br />
+
+                        <div id="userGroupFields" style="display: none;">
+                            <label for="NewDirPath">Dir Path:</label><br />
+                            <input type="text" id="NewDirPath" name="NewDirPath"><br />
+
+                            <label for="NewPlaceId">User Group ID:</label><br />
+                            <input type="text" id="NewPlaceId" name="NewPlaceId"><br />
+
+                            <label for="NewClearAllUsers">Clear All Users:</label>
+                            <input type="checkbox" id="NewClearAllUsers" name="NewClearAllUsers"><br />
+                        </div>
+
+                        <div id="monthlyFields" style="display: none;">
+                            <label for="NewDirPathMonthly">Dir Path:</label><br />
+                            <input type="text" id="NewDirPathMonthly" name="NewDirPathMonthly"><br />
+
+                            <label for="NewPlaceIdMonthly">Place ID:</label><br />
+                            <input type="text" id="NewPlaceIdMonthly" name="NewPlaceIdMonthly"><br />
+
+                            <label for="NewClearAllUsersMonthly">Clear All Users:</label>
+                            <input type="checkbox" id="NewClearAllUsersMonthly" name="NewClearAllUsersMonthly"><br />
+
+                            <label for="NewClearSpecified">Clear Specified:</label>
+                            <input type="checkbox" id="NewClearSpecified" name="NewClearSpecified"><br />
+
+                            <label for="NewIgnoreRowsWithNoPlace">Ignore Rows With No Place:</label>
+                            <input type="checkbox" id="NewIgnoreRowsWithNoPlace" name="NewIgnoreRowsWithNoPlace"><br />
+
+                            <label for="NewUpdated">Updated:</label>
+                            <input type="text" id="NewUpdated" name="NewUpdated"><br />
+                        </div>
+
+                        <label for="editTrigger">Trigger:</label><br />
+                        <select id="NewTrigger" name="NewTrigger">
+                            <option value="" disabled>please choose type</option>
+                            <option value="Minutely">Minutely</option>
+                            <option value="Hourly">Hourly</option>
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Yearly">Yearly</option>
+                        </select><br />
+
+                        <div id="minutelyTriggerFields" style="display: none;">
+                            <label for="minutelyInterval">Interval (in minutes):</label><br />
+                            <input type="number" id="minutelyInterval" name="minutelyInterval" min="1" required><br>
+
+                            <label for="minutelyTaskTime">Task Time:</label><br />
+                            <input type="datetime-local" id="minutelyTaskTime" name="minutelyTaskTime" required><br>
+                        </div>
+
+                        <div id="hourlyTriggerFields" style="display: none;">
+                            <label for="hourlyInterval">Interval (in hours):</label><br />
+                            <input type="number" id="hourlyInterval" name="hourlyInterval" min="1" required><br>
+
+                            <label for="hourlyTaskTime">Task Time:</label><br />
+                            <input type="datetime-local" id="hourlyTaskTime" name="hourlyTaskTime" required><br>
+                        </div>
+
+                        <div id="dailyTriggerFields" style="display: none;">
+                            <label for="dailyInterval">Time of Day:</label><br />
+                            <input type="time" id="dailyInterval" name="dailyInterval" required><br>
+
+                            <label for="dailyTaskTime">Task Time:</label><br />
+                            <input type="datetime-local" id="dailyTaskTime" name="dailyTaskTime" required><br>
+                        </div>
+
+                        <div id="weeklyTriggerFields" style="display: none;">
+                            <label for="weeklyDay">Select Day:</label> <br />
+                            <select id="weeklyDay" name="weeklyDay">
+                                <option id="Sunday" value="sunday">Sunday</option>
+                                <option id="monday" value="monday">Monday</option>
+                                <option id="tuesday" value="tuesday">Tuesday</option>
+                                <option id="wednesday" value="wednesday">Wednesday</option>
+                                <option id="thursday" value="thursday">Thursday</option>
+                                <option id="friday" value="friday">Friday</option>
+                                <option id="saturday" value="saturday">Saturday</option>
+                            </select><br>
+
+                            <label for="weeklyTaskTime">Task Time:</label><br />
+                            <input type="datetime-local" id="weeklyTaskTime" name="weeklyTaskTime" required><br>
+                        </div>
+
+                        <div id="monthlyTriggerFields" style="display: none;">
+                            <label for="monthlyDay">Day of Month:</label><br />
+                            <input type="number" id="monthlyDay" name="monthlyDay" min="1" max="31" required><br>
+
+                            <label for="monthlyTaskTime">Task Time:</label><br />
+                            <input type="datetime-local" id="monthlyTaskTime" name="monthlyTaskTime" required><br>
+                        </div>
+
+                        <div id="yearlyTriggerFields" style="display: none;">
+                            <label for="yearlyInterval">Interval (in years)</label><br />
+                            <input type="number" id="yearlyInterval" name="yearlyInterval" min="1" required><br>
+
+                            <label for="yearlyTaskTime">Task Time:</label><br />
+                            <input type="datetime-local" id="yearlyTaskTime" name="yearlyTaskTime" required><br>
+                        </div>
+
+
+                        <label for="editActive">Active:</label>
+                        <input type="checkbox" id="NewActive" name="NewActive"> <br />
+
+                        <label for="editEmailList">Email List:</label> <br />
+                        <textarea id="NewEmailList" name="NewEmailList"></textarea> <br />
+
+                        <label for="editDescription">Description:</label> <br />
+                        <textarea id="NewDescription" name="NewDescription"></textarea> <br />
+
+                    </form>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" id="saveButton">Save</button>
+                    <button type="button" id="cancelButton">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Modal for displaying "Last Run" data -->
+            <!-- <div id="lastRunModal" class="modal">
+            <div class="modal-content">
+                <h3>Tel Hashomer - Last Log</h3>
+                <span id="lastRunModalCloseButton" class="close">&times;</span>
+                <pre id="lastRunModalContent"></pre>
+            </div>
+        </div> -->
+
+            <script type=module src="/static/main.js" charset="utf-8"></script>
+
+            <script>
+                // set the Task id field as readonly
+                // const inputElement = document.getElementById('newTaskId');
+                // inputElement.readOnly = true;
+            </script>
+
+</body>
+
+</html>

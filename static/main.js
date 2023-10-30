@@ -5,6 +5,7 @@ let currentPage = 1;
 let transformedData = [];
 let shouldOpenModal = false;
 let isAddingNewTask = false;
+let SumDays = 0
 
 // #############################################################################################################################################################
 // function to display the data at the Tasks table and from the emails table
@@ -127,6 +128,7 @@ async function populateEditModal(record, isNewTask, callback) {
             }
 
             const triggerTypeSelect = document.getElementById('NewTrigger');
+
             triggerTypeSelect.addEventListener('change', function () {
                 const selectedTriggerType = this.value;
                 toggleFieldsBasedOnTriggerType(selectedTriggerType);
@@ -145,6 +147,32 @@ async function populateEditModal(record, isNewTask, callback) {
 
             toggleFieldsBasedOnTriggerType(record.TriggerType);
 
+            // Helper function to get selected days for weekly trigger and mark checkboxes
+            function getSelectedDaysOfWeek(decimalNumber) {
+                const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                for (let i = 0; i < daysOfWeek.length; i++) {
+                    const bitValue = Math.pow(2, i);
+                    document.getElementById(daysOfWeek[i] + 'Checkbox').checked = (decimalNumber & bitValue) !== 0;
+                }
+            }
+
+            // Helper function to get selected days for monthly trigger and mark checkboxes
+            function getSelectedDaysOfMonth(decimalNumber) {
+                for (let i = 1; i <= 32; i++) {
+                    const bitValue = Math.pow(2, i - 1);
+                    document.getElementById('day' + i).checked = (decimalNumber & bitValue) !== 0;
+                }
+            }
+
+            // Check the trigger type and populate selected days accordingly
+            const selectedTriggerType = triggerTypeSelect.value;
+
+            if (selectedTriggerType === 'Weekly') {
+                getSelectedDaysOfWeek(record.DaysOfWeek);
+            } else if (selectedTriggerType === 'Monthly') {
+                getSelectedDaysOfMonth(record.DaysOfMonth);
+            }
+            
             // Show the edit modal
             const editModal = document.getElementById('editModal');
             editModal.style.display = 'block';
@@ -274,91 +302,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 // ###########################################################################################################
-// Event handler for the "Save" button in the edit modal
-// async function saveButtonClicked(event) {
-//     event.preventDefault();
-
-//     const TaskId = document.getElementById('newTaskId').value;
-//     const TaskName = document.getElementById('newTaskName').value;
-//     const TaskType = document.getElementById('newTaskType').value;
-//     const Active = document.getElementById('NewActive').checked ? 0 : 1;
-//     const Description = document.getElementById('NewDescription').value;
-
-//     // console.log("this", document.getElementById('NewDirPath').value)
-//     // console.log(TaskType);
-
-//     let DirPath
-//     let PlaceId
-//     let ClearAllUsers
-
-//     if (TaskType === 'User Group') {
-//         DirPath = document.getElementById('NewDirPath').value;
-//         PlaceId = document.getElementById('NewPlaceId').value;
-//         ClearAllUsers = document.getElementById('NewClearAllUsers').checked ? 1 : 0;
-//     } else if (TaskType === 'Monthly') {
-//         DirPath = document.getElementById('NewDirPathMonthly').value;
-//         PlaceId = document.getElementById('NewPlaceIdMonthly').value;
-//         ClearAllUsers = document.getElementById('NewClearAllUsersMonthly').checked ? 1 : 0;
-//     }
-
-//     const ClearSpecified = document.getElementById('NewClearSpecified').checked ? 1 : 0;
-//     const IgnoreRowsWithNoPlace = document.getElementById('NewIgnoreRowsWithNoPlace').checked ? 1 : 0;
-//     const Updated = document.getElementById('NewUpdated').value;
-
-//     const NewEmailList = document.getElementById('NewEmailList').value;
-//     const Emails = NewEmailList.split(',').map(email => email.trim());
-
-//     let updatedTaskData = {
-//         TaskId,
-//         TaskName,
-//         TaskType,
-//         Active,
-//         Description,
-//         DirPath,
-//         PlaceId,
-//         ClearAllUsers,
-//         ClearSpecified,
-//         IgnoreRowsWithNoPlace,
-//         Updated,
-//         Emails: Emails
-//     };
-
-//     try {
-//         // Send updated data to the server and handle the response
-//         const response = await fetch('http://localhost:5000/api/update_task', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify(updatedTaskData),
-//         });
-
-//         if (response.ok) {
-//             const result = await response.json();
-//             console.log(result.message);
-
-//             // Fetch updated data immediately after updating the task
-//             const dataResponse = await fetch('http://localhost:5000/api/get_task');
-//             if (dataResponse.ok) {
-//                 const data = await dataResponse.json();
-//                 transformedData = transformData(data);
-//                 // Display updated data in the table
-//                 displayDataInTable(transformedData, currentPage);
-
-//                 closeEditModal();
-//             } else {
-//                 console.error('Error fetching data:', dataResponse.status);
-//             }
-//         } else {
-//             console.error('Error updating task:', response.status);
-//             const errorResponse = await response.json();
-//             console.error('Error details:', errorResponse);
-//         }
-//     } catch (error) {
-//         console.error('Error updating task:', error);
-//     }
-// }
-
 async function saveButtonClicked(event) {
     event.preventDefault();
     
@@ -386,6 +329,62 @@ async function saveButtonClicked(event) {
     const IgnoreRowsWithNoPlace = document.getElementById('NewIgnoreRowsWithNoPlace').checked ? 1 : 0;
     const Updated = document.getElementById('NewUpdated').value;
 
+    let Interval
+    let TaskTime
+    let DaysOfWeek = 0;
+    let DaysOfMonth = 0;
+
+    const TriggerType = document.getElementById('NewTrigger').value;
+
+    if (TriggerType === 'Weekly') {
+        const checkboxes = document.querySelectorAll('input[name="daysOfWeek[]"]');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                DaysOfWeek += parseInt(checkbox.value);
+            }
+        });
+    } else if (TriggerType === 'Monthly') {
+        const monthlyDaysCheckboxes = document.querySelectorAll('input[name="monthlyDays[]"]');
+        monthlyDaysCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                DaysOfMonth += parseInt(checkbox.value, 10);
+            }
+        });
+    }
+
+    if (TriggerType === "Minutely"){
+        Interval = document.getElementById('minutelyInterval').value;
+        TaskTime = document.getElementById('minutelyTaskTime').value;
+        DaysOfWeek = '0'
+        DaysOfMonth = '0'
+    } else if (TriggerType === 'Hourly') {
+        Interval = document.getElementById('hourlyInterval').value;
+        TaskTime = document.getElementById('hourlyTaskTime').value;
+        DaysOfWeek = '0'
+        DaysOfMonth = '0'
+    } else if (TriggerType === 'Daily') {
+        Interval = '0'
+        TaskTime = document.getElementById('dailyTaskTime').value;
+        DaysOfWeek = '0'
+        DaysOfMonth = '0'
+    } else if (TriggerType === 'Weekly') {
+        Interval = '0'
+        TaskTime = document.getElementById('weeklyTaskTime').value;
+        DaysOfMonth = '0'
+        console.log("DaysOfWeek", DaysOfWeek)
+    } else if (TriggerType === 'Monthly') {
+        Interval = '0'
+        TaskTime = document.getElementById('monthlyTaskTime').value;
+        DaysOfWeek = '0'
+        console.log("DaysOfMonth", DaysOfMonth)
+    } else if (TriggerType === 'Yearly') {
+        Interval = document.getElementById('yearlyInterval').value;
+        TaskTime = document.getElementById('yearlyTaskTime').value;
+        DaysOfWeek = '0'
+        DaysOfMonth = '0'
+    }
+
+
     const NewEmailList = document.getElementById('NewEmailList').value;
     const Emails = NewEmailList.split(',').map(email => email.trim());
 
@@ -401,13 +400,18 @@ async function saveButtonClicked(event) {
         ClearSpecified,
         IgnoreRowsWithNoPlace,
         Updated,
+        TriggerType,
+        Interval,
+        DaysOfWeek,
+        DaysOfMonth,
+        TaskTime,
         Emails: Emails
     };
 
     try {
         // Send updated data to the server and handle the response
-        const apiEndpoint = isAddingNewTask ? 'add_task' : 'update_task';
-        const response = await fetch(`http://localhost:5000/api/${apiEndpoint}`, {
+        // const apiEndpoint = isAddingNewTask ? 'add_task' : 'update_task';
+        const response = await fetch(`http://localhost:5000/api/update_task`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -415,6 +419,7 @@ async function saveButtonClicked(event) {
             body: JSON.stringify(updatedTaskData),
         });
 
+        console.log("isAddingNewTask", isAddingNewTask)
         if (response.ok) {
             const result = await response.json();
             console.log(result.message);
@@ -540,6 +545,19 @@ addNewTaskButton.addEventListener('click', async function () {
     document.getElementById('NewClearSpecified').checked = false;
     document.getElementById('NewIgnoreRowsWithNoPlace').checked = false;
     document.getElementById('NewUpdated').value = '';
+    document.getElementById('NewTrigger').value = '';
+    document.getElementById('sundayCheckbox').checked = false; 
+    document.getElementById('mondayCheckbox').checked = false; 
+    document.getElementById('tuesdayCheckbox').checked = false; 
+    document.getElementById('wednesdayCheckbox').checked = false; 
+    document.getElementById('thursdayCheckbox').checked = false; 
+    document.getElementById('fridayCheckbox').checked = false; 
+    document.getElementById('saturdayCheckbox').checked = false; 
+    // Assuming the checkboxes are named day1, day2, day3, ..., day31
+    for (let i = 1; i <= 31; i++) {
+        document.getElementById('day' + i).checked = false;
+    }
+    document.getElementById('day32').checked = false; 
 
    // Show the modal
    const editModal = document.getElementById('editModal');
@@ -553,7 +571,6 @@ addNewTaskButton.addEventListener('click', async function () {
 
 //    in order to let the option to edit the task id field in add new task
    populateEditModal({}, true);
-
 })
 
 // Event handler for the "Add" button in the edit modal
@@ -601,11 +618,27 @@ async function addTaskButtonClicked(event) {
     const Updated = document.getElementById('NewUpdated').value;
 
     let Interval
-    let DaysOfWeek
-    let DaysOfMonth
     let TaskTime
 
+    let DaysOfWeek = 0;
+    let DaysOfMonth = 0;
+
     const TriggerType = document.getElementById('NewTrigger').value;
+    if (TriggerType === 'Weekly') {
+        const checkboxes = document.querySelectorAll('input[name="daysOfWeek[]"]');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                DaysOfWeek += parseInt(checkbox.value);
+            }
+        });
+    } else if (TriggerType === 'Monthly') {
+        const monthlyDaysCheckboxes = document.querySelectorAll('input[name="monthlyDays[]"]');
+        monthlyDaysCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                DaysOfMonth += parseInt(checkbox.value, 10);
+            }
+        });
+    }
 
     if (TriggerType === "Minutely"){
         Interval = document.getElementById('minutelyInterval').value;
@@ -618,26 +651,27 @@ async function addTaskButtonClicked(event) {
         DaysOfWeek = '0'
         DaysOfMonth = '0'
     } else if (TriggerType === 'Daily') {
-        Interval = document.getElementById('dailyInterval').value;
+        Interval = '0'
         TaskTime = document.getElementById('dailyTaskTime').value;
         DaysOfWeek = '0'
         DaysOfMonth = '0'
     } else if (TriggerType === 'Weekly') {
         Interval = '0'
-        DaysOfWeek = document.getElementById('weeklyDay').value;
         TaskTime = document.getElementById('weeklyTaskTime').value;
         DaysOfMonth = '0'
+        console.log("DaysOfWeek", DaysOfWeek)
     } else if (TriggerType === 'Monthly') {
         Interval = '0'
-        DaysOfWeek = document.getElementById('monthlyDay').value;
         TaskTime = document.getElementById('monthlyTaskTime').value;
-        DaysOfMonth = '0'
+        DaysOfWeek = '0'
+        console.log("DaysOfMonth", DaysOfMonth)
     } else if (TriggerType === 'Yearly') {
         Interval = document.getElementById('yearlyInterval').value;
         TaskTime = document.getElementById('yearlyTaskTime').value;
         DaysOfWeek = '0'
         DaysOfMonth = '0'
     }
+
 
     const NewEmailList = document.getElementById('NewEmailList').value;
     const Emails = NewEmailList.split(',').map(email => email.trim());

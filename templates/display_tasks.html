@@ -123,33 +123,101 @@
                         </div>
 
                         <div id="dailyTriggerFields" style="display: none;">
-                            <label for="dailyInterval">Time of Day:</label><br />
-                            <input type="time" id="dailyInterval" name="dailyInterval" required><br>
+                            <!-- <label for="dailyInterval">Interval (in hours):</label><br />
+                            <input type="time" id="dailyInterval" name="dailyInterval" required><br> -->
 
                             <label for="dailyTaskTime">Task Time:</label><br />
                             <input type="datetime-local" id="dailyTaskTime" name="dailyTaskTime" required><br>
                         </div>
 
-                        <div id="weeklyTriggerFields" style="display: none;">
-                            <label for="weeklyDay">Select Day:</label> <br />
-                            <select id="weeklyDay" name="weeklyDay">
-                                <option id="Sunday" value="sunday">Sunday</option>
-                                <option id="monday" value="monday">Monday</option>
-                                <option id="tuesday" value="tuesday">Tuesday</option>
-                                <option id="wednesday" value="wednesday">Wednesday</option>
-                                <option id="thursday" value="thursday">Thursday</option>
-                                <option id="friday" value="friday">Friday</option>
-                                <option id="saturday" value="saturday">Saturday</option>
-                            </select><br>
-
+                        <div id="weeklyTriggerFields">
+                            <label>Select Day:</label><br>
+                            <input type="checkbox" id="sundayCheckbox" name="daysOfWeek[]" value="1">
+                            <label for="sundayCheckbox">Sunday</label>
+                            <input type="checkbox" id="mondayCheckbox" name="daysOfWeek[]" value="2">
+                            <label for="mondayCheckbox">Monday</label>
+                            <input type="checkbox" id="tuesdayCheckbox" name="daysOfWeek[]" value="4">
+                            <label for="tuesdayCheckbox">Tuesday</label>
+                            <input type="checkbox" id="wednesdayCheckbox" name="daysOfWeek[]" value="8">
+                            <label for="wednesdayCheckbox">Wednesday</label><br/>
+                            <input type="checkbox" id="thursdayCheckbox" name="daysOfWeek[]" value="16">
+                            <label for="thursdayCheckbox">Thursday</label>
+                            <input type="checkbox" id="fridayCheckbox" name="daysOfWeek[]" value="32">
+                            <label for="fridayCheckbox">Friday</label>
+                            <input type="checkbox" id="saturdayCheckbox" name="daysOfWeek[]" value="64">
+                            <label for="saturdayCheckbox">Saturday</label> <br/>
+                        
                             <label for="weeklyTaskTime">Task Time:</label><br />
                             <input type="datetime-local" id="weeklyTaskTime" name="weeklyTaskTime" required><br>
                         </div>
 
                         <div id="monthlyTriggerFields" style="display: none;">
-                            <label for="monthlyDay">Day of Month:</label><br />
-                            <input type="number" id="monthlyDay" name="monthlyDay" min="1" max="31" required><br>
-
+                            <label>Day of Month:</label> <br/>
+                            <input type="checkbox" id="day1" name="monthlyDays[]" value="1">
+                            <label for="day1">1</label>
+                            <input type="checkbox" id="day2" name="monthlyDays[]" value="2">
+                            <label for="day2">2</label>
+                            <input type="checkbox" id="day3" name="monthlyDays[]" value="4">
+                            <label for="day3">3</label>
+                            <input type="checkbox" id="day4" name="monthlyDays[]" value="8">
+                            <label for="day4">4</label>
+                            <input type="checkbox" id="day5" name="monthlyDays[]" value="16">
+                            <label for="day5">5</label>
+                            <input type="checkbox" id="day6" name="monthlyDays[]" value="32">
+                            <label for="day6">6</label>
+                            <input type="checkbox" id="day7" name="monthlyDays[]" value="64">
+                            <label for="day7">7</label>
+                            <input type="checkbox" id="day8" name="monthlyDays[]" value="128">
+                            <label for="day8">8</label>
+                            <input type="checkbox" id="day9" name="monthlyDays[]" value="256">
+                            <label for="day9">9</label>
+                            <input type="checkbox" id="day10" name="monthlyDays[]" value="512">
+                            <label for="day10">10</label>
+                            <input type="checkbox" id="day11" name="monthlyDays[]" value="1024">
+                            <label for="day11">11</label>
+                            <input type="checkbox" id="day12" name="monthlyDays[]" value="2048">
+                            <label for="day12">12</label>
+                            <input type="checkbox" id="day13" name="monthlyDays[]" value="4096">
+                            <label for="day13">13</label>
+                            <input type="checkbox" id="day14" name="monthlyDays[]" value="8192">
+                            <label for="day14">14</label>
+                            <input type="checkbox" id="day15" name="monthlyDays[]" value="16384">
+                            <label for="day15">15</label>
+                            <input type="checkbox" id="day16" name="monthlyDays[]" value="32768">
+                            <label for="day16">16</label>
+                            <input type="checkbox" id="day17" name="monthlyDays[]" value="65536">
+                            <label for="day17">17</label>
+                            <input type="checkbox" id="day18" name="monthlyDays[]" value="131072">
+                            <label for="day18">18</label>
+                            <input type="checkbox" id="day19" name="monthlyDays[]" value="262144">
+                            <label for="day19">19</label>
+                            <input type="checkbox" id="day20" name="monthlyDays[]" value="524288">
+                            <label for="day20">20</label>
+                            <input type="checkbox" id="day21" name="monthlyDays[]" value="1048576">
+                            <label for="day21">21</label> 
+                            <input type="checkbox" id="day22" name="monthlyDays[]" value="2097152">
+                            <label for="day22">22</label>
+                            <input type="checkbox" id="day23" name="monthlyDays[]" value="4194304">
+                            <label for="day23">23</label>
+                            <input type="checkbox" id="day24" name="monthlyDays[]" value="8388608">
+                            <label for="day24">24</label>
+                            <input type="checkbox" id="day25" name="monthlyDays[]" value="16777216">
+                            <label for="day25">25</label>
+                            <input type="checkbox" id="day26" name="monthlyDays[]" value="33554432">
+                            <label for="day26">26</label>
+                            <input type="checkbox" id="day27" name="monthlyDays[]" value="67108864">
+                            <label for="day27">27</label>
+                            <input type="checkbox" id="day28" name="monthlyDays[]" value="134217728">
+                            <label for="day28">28</label>
+                            <input type="checkbox" id="day29" name="monthlyDays[]" value="268435456">
+                            <label for="day29">29</label>
+                            <input type="checkbox" id="day30" name="monthlyDays[]" value="536870912">
+                            <label for="day30">30</label>
+                            <input type="checkbox" id="day31" name="monthlyDays[]" value="1073741824">
+                            <label for="day31">31</label>
+                            <input type="checkbox" id="day32" name="monthlyDays[]" value="2147483648">
+                            <label for="lastDay">Last</label><br/>
+                            
                             <label for="monthlyTaskTime">Task Time:</label><br />
                             <input type="datetime-local" id="monthlyTaskTime" name="monthlyTaskTime" required><br>
                         </div>

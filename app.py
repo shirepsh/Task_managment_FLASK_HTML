@@ -18,6 +18,7 @@ def fetch_data():
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM Tasks")
             data = cursor.fetchall()
+            # print("Fetched data from database:", data) 
             return data
     except Exception as e:
         print(str(e))
@@ -55,6 +56,7 @@ def get_emails():
 def add_task():
     try:
         add_data = request.json
+        # print("Received data:", add_data) 
         TaskId= add_data['TaskId']
         TaskName = add_data['TaskName']
         TaskType = add_data['TaskType']
@@ -85,6 +87,8 @@ def add_task():
                 # Insert new email records into the TasksReportEmail table using the with statement
                 for email in Emails:
                     cursor.execute("INSERT INTO TasksReportEmail (TaskId, Email) VALUES (?, ?)", (TaskId, email.strip()))
+                conn.commit()
+
 
         updated_data = fetch_data()  # Fetch updated data from the database
         return jsonify({'message': 'Task added successfully', 'data': updated_data}), 200
@@ -99,10 +103,9 @@ def add_task():
 def update_task():
     try:
         updated_data = request.json
-        print(updated_data)
 
         # Check for required keys in the JSON data
-        required_keys = ['TaskId', 'TaskName', 'TaskType', 'Active', 'Description', 'DirPath', 'PlaceId', 'ClearAllUsers', 'ClearSpecified', 'IgnoreRowsWithNoPlace', 'Updated']
+        required_keys = ['TaskId', 'TaskName', 'TaskType', 'Active', 'Description', 'DirPath', 'PlaceId', 'ClearAllUsers', 'ClearSpecified', 'IgnoreRowsWithNoPlace', 'Updated', 'TriggerType', 'Interval', 'DaysOfWeek', 'DaysOfMonth', 'TaskTime']
         if not all(key in updated_data for key in required_keys):
             return jsonify({'error': 'Invalid Request: Missing required keys'}), 400
 
@@ -117,6 +120,11 @@ def update_task():
         ClearSpecified = updated_data['ClearSpecified']
         IgnoreRowsWithNoPlace = updated_data['IgnoreRowsWithNoPlace']
         Updated = updated_data['Updated']
+        TriggerType = updated_data['TriggerType']
+        Interval = updated_data['Interval']
+        DaysOfWeek = updated_data['DaysOfWeek']
+        DaysOfMonth = updated_data['DaysOfMonth']
+        TaskTime = updated_data['TaskTime']
         emails = updated_data.get('Emails', [])
 
         # Update the task record in the database (assuming you have sanitized inputs to prevent SQL injection)
@@ -125,8 +133,8 @@ def update_task():
         conn.execute("BEGIN")
 
         try:
-            cursor.execute("UPDATE Tasks SET TaskName=?, TaskType=?, Active=?, Description=?, DirPath=?, PlaceId=?, ClearAllUsers=?, ClearSpecified=?, IgnoreRowsWithNoPlace=?, Updated=? WHERE TaskId=?", 
-                        (TaskName, TaskType, Active, Description, DirPath, PlaceId, ClearAllUsers, ClearSpecified, IgnoreRowsWithNoPlace, Updated, TaskId))
+            cursor.execute("UPDATE Tasks SET TaskName=?, TaskType=?, Active=?, Description=?, DirPath=?, PlaceId=?, ClearAllUsers=?, ClearSpecified=?, IgnoreRowsWithNoPlace=?, Updated=?, TriggerType=?, Interval=?, DaysOfWeek=?, DaysOfMonth=?, TaskTime=?  WHERE TaskId=?", 
+                        (TaskName, TaskType, Active, Description, DirPath, PlaceId, ClearAllUsers, ClearSpecified, IgnoreRowsWithNoPlace, Updated, TriggerType, Interval, DaysOfWeek, DaysOfMonth, TaskTime, TaskId))
             
             for email in emails:
                 cursor.execute("INSERT OR REPLACE INTO TasksReportEmail (TaskId, Email) VALUES (?, ?)", (TaskId, email.strip()))
